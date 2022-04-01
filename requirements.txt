@@ -1,0 +1,4 @@
+# python==3.9.7
+qiskit==0.31.0
+numpy==1.21.2
+scipy==1.7.1
