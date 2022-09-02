@@ -8,10 +8,10 @@ class QBMData():
     that #hidden ~ O(#visible)). 
     '''
 
-    def __init__(self, num_visible_qubits, num_hidden_qubits):
+    def __init__(self, num_visible_qubits, num_hidden_qubits, **kwargs):
         self.num_visible_qubits = num_visible_qubits
         self.num_hidden_qubits = num_hidden_qubits
-        self.reuse_ancilla = True
+        self.reuse_ancilla = kwargs.get('reuse_ancilla', True) 
         self.node_type = 'sign'
 
         self.num_qbm_qubits = self.get_num_qbm_qubits()

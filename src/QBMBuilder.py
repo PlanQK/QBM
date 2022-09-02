@@ -13,7 +13,7 @@ class QBMBuilder(QBMData):
     def __init__(self, qbm_data, backend = None):
         self.num_visible_qubits = qbm_data.num_visible_qubits
         self.num_hidden_qubits = qbm_data.num_hidden_qubits
-        self.reuse_ancilla = True
+        self.reuse_ancilla = qbm_data.reuse_ancilla
         self.node_type = 'sign'
         self.backend = q.Aer.get_backend('qasm_simulator') if backend is None else backend
         self.circuit = None
