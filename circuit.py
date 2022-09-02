@@ -1,6 +1,8 @@
 from src.QBMBuilder import QBMBuilder
 from src.QBMData import QBMData
 
+# While being in QBM repo: python -m circuit
+
 num_visible_qubits = 2
 num_hidden_qubits = 2
 reuse_ancilla = True
