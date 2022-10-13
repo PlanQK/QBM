@@ -16,6 +16,19 @@ def get_circuit(**kwargs):
     circuit = qbm_builder.prepare_qbm()
     return circuit
 
+def get_circuit_with_parameters(**kwargs):
+    n_vis = kwargs.get("num_visible_qubits")
+    n_hid = kwargs.get("num_hidden_qubits")
+    reuse_ancilla = kwargs.get("reuse_ancilla", True)
+    qbm_data = QBMData(n_vis, n_hid, reuse_ancilla=reuse_ancilla)
+    qbm_builder = QBMBuilder(qbm_data)
+    
+    params = kwargs.get("params")
+    if params is None:
+        params = np.random.rand(qbm_data.num_params)
+    circuit = qbm_builder.prepare_qbm()
+    return circuit
+
 # source code:
 class QBMData():
     '''
@@ -490,9 +503,7 @@ class QBMBuilder(QBMData):
             new_state_amplitudes = {key: value[0]*value[1]
                                 for key, value in state_amplitudes.items()}
         return new_state_amplitudes
-
-
-    
+ 
 def binary_string_to_spin_list(obj, reverse = False):
     # trafo '1001' <=> [-1,1,1,-1]
     # s_i = 1-2x_i
