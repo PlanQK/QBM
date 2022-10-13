@@ -26,7 +26,7 @@ def get_circuit_with_parameters(**kwargs):
     params = kwargs.get("params")
     if params is None:
         params = np.random.rand(qbm_data.num_params)
-    circuit = qbm_builder.prepare_qbm()
+    circuit = qbm_builder.prepare_qbm(params)
     return circuit
 
 # source code:
