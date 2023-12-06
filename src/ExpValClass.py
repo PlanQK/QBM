@@ -34,18 +34,18 @@ class ExpValClass():
     def get_op_state_amplitudes(self, op_string):
         '''
         For the input op_string (e.g. 'IXYZ'), the state op_string*psi gets calculated.
-        
+
         Args:
             op_string: String
                 Operator of interest. E.g. 'IXYZ'
-        
+
         Returns:
             op_state_amplitudes: Dict(String: Float)
                 New state amplitudes after the action of the operator.
         '''
         example_state = list(self.state_amplitudes.keys())[0]
         assert len(example_state) == len(op_string), \
-        "operator has not the same length as the visible register"
+            "operator has not the same length as the visible register"
 
         op_state_amplitudes = {}
         for key, value in self.state_amplitudes.items():
@@ -65,7 +65,7 @@ class ExpValClass():
                 if op == 'Y':
                     new_amplitude *= (2*bit - 1)*complex(0, 1)
                 if op in ('X', 'Y'):
-                    bit = (bit + 1)%2
+                    bit = (bit + 1) % 2
                 new_binary_list.append(str(bit))
 
             new_state = ''.join(new_binary_list)
@@ -78,8 +78,7 @@ class ExpValClass():
                 print('whoopsie')
         return op_state_amplitudes
 
-
-    def get_exp_value(self, op_string, normed = True):
+    def get_exp_value(self, op_string, normed=True):
         '''
         For a given op_string, the expectation value of it is calculated, namely
         np.conj(state_amplitudes)*op_string_amplitudes/(np.conj(state_amplitudes)*
@@ -113,14 +112,14 @@ class ExpValClass():
                 else:
                     print('whoopsie')
 
-        if normed: 
+        if normed:
             exp_val /= self.state_amplitudes_braket
         if exp_val.imag > 1e-10:
             print('expectation value has non vanishing imaginary part.')
             return exp_val
         return exp_val.real
 
-    def get_hamilton_exp_value(self, cache_exp_values = False):
+    def get_hamilton_exp_value(self, cache_exp_values=False):
         '''
         Iterates over the hamiltonian and calculates its expectation value.
 
@@ -128,7 +127,7 @@ class ExpValClass():
             cache_exp_values: Bool
                 If set to True, the expectation values of the pauli strings making up the 
                 Hamiltonian will be stored in a dictionary.
-        
+
         Returns:
             Tuple(Float, Union[Dict, None])
                 Second output will be a dict containing the expectation values of the strings
@@ -138,9 +137,9 @@ class ExpValClass():
         exp_val = 0
         op_string_exp_val_dict = {} if cache_exp_values else None
         for op_string, coeff in self.hamilton.items():
-            op_string_exp_val = self.get_exp_value(op_string = op_string, normed = False)
+            op_string_exp_val = self.get_exp_value(op_string=op_string, normed=False)
             if cache_exp_values:
-                op_string_exp_val_dict[op_string] =  op_string_exp_val/self.state_amplitudes_braket
+                op_string_exp_val_dict[op_string] = op_string_exp_val/self.state_amplitudes_braket
             exp_val += coeff*op_string_exp_val
         exp_val /= self.state_amplitudes_braket
         return exp_val, op_string_exp_val_dict
@@ -153,8 +152,8 @@ class ExpValClass():
         '''
         hamilton_state_amplitude = 0
         for op, coeff in self.hamilton.items():
-            op_on_state = self.get_op_state_amplitudes(op_string = op)
-            if state in op_on_state.keys():
+            op_on_state = self.get_op_state_amplitudes(op_string=op)
+            if state in op_on_state:
                 hamilton_state_amplitude += coeff*op_on_state[state]
 
         if self.state_amplitudes[state] == 0:
@@ -179,8 +178,8 @@ class ExpValClass():
         params_dict = self.qbm_data.get_params_dict(params_list)
         hidden_biases = params_dict['hidden_biases']
         weights = params_dict['weights']
-        
-        normed_d = np.zeros(shape = (self.qbm_data.num_params))
+
+        normed_d = np.zeros(shape=self.qbm_data.num_params)
 
         spin_state_list = np.array(binary_string_to_spin_list(state))
         theta = np.dot(spin_state_list, weights) + hidden_biases
@@ -193,23 +192,23 @@ class ExpValClass():
 
         # weights
         for i in range(self.qbm_data.num_visible_qubits):
-            normed_d[self.qbm_data.num_qbm_qubits + i*self.qbm_data.num_hidden_qubits: 
-                    self.qbm_data.num_qbm_qubits + (i+1)*self.qbm_data.num_hidden_qubits] \
-                        = theta*spin_state_list[i]/2
+            normed_d[self.qbm_data.num_qbm_qubits + i*self.qbm_data.num_hidden_qubits:
+                     self.qbm_data.num_qbm_qubits + (i+1)*self.qbm_data.num_hidden_qubits] \
+                = theta*spin_state_list[i]/2
 
         # sign biases
         node_value = self.qbm_data.get_node_value(spin_state_list, params_dict)
         sign_shift_func = 1/node_value - node_value
 
         normed_d[self.qbm_data.num_q_params:
-                self.qbm_data.num_q_params + self.qbm_data.num_visible_qubits] \
-                    = sign_shift_func*spin_state_list
+                 self.qbm_data.num_q_params + self.qbm_data.num_visible_qubits] \
+            = sign_shift_func*spin_state_list
 
         # sign shift
         normed_d[self.qbm_data.num_q_params + self.qbm_data.num_visible_qubits:
-                self.qbm_data.num_q_params + self.qbm_data.num_visible_qubits + 1] \
-                    = sign_shift_func
-        
+                 self.qbm_data.num_q_params + self.qbm_data.num_visible_qubits + 1] \
+            = sign_shift_func
+
         return normed_d
 
     def get_grad_h(self, params_list):
@@ -221,12 +220,12 @@ class ExpValClass():
         depends on params_list as well. 
         '''
 
-        exp_val_1 = np.zeros(shape = (self.qbm_data.num_params), dtype = complex)
-        exp_val_2 = np.zeros(shape = (self.qbm_data.num_params), dtype = complex)
-        exp_val_3 = np.zeros(shape = (self.qbm_data.num_params), dtype = complex)
+        exp_val_1 = np.zeros(shape=(self.qbm_data.num_params), dtype=complex)
+        exp_val_2 = np.zeros(shape=(self.qbm_data.num_params), dtype=complex)
+        exp_val_3 = np.zeros(shape=(self.qbm_data.num_params), dtype=complex)
         state_probabilities = {
             key: np.abs(value)**2 for key, value in self.state_amplitudes.items()}
-        
+
         for state, probability in state_probabilities.items():
             e_loc = self.get_local_energy(state)
             d_vec = self.get_normed_amplitude_gradient(state, params_list)
@@ -236,6 +235,6 @@ class ExpValClass():
             exp_val_3 += d_vec*probability
 
         grad_h = 2*(exp_val_1 - exp_val_2*exp_val_3/(self.state_amplitudes_braket))\
-            /self.state_amplitudes_braket
+            / self.state_amplitudes_braket
 
         return grad_h.real

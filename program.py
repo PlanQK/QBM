@@ -2,6 +2,7 @@ from src import QBMBuilder, QBMData, ExpValClass
 
 import numpy as np
 
+
 def optimize_qbm_from_hamiltonian(hamiltonian,
                                   num_hidden_qubits=None,
                                   backend=None,
@@ -22,14 +23,14 @@ def optimize_qbm_from_hamiltonian(hamiltonian,
         print_results: Bool
             If set to True, prints hamiltonian expectation values during the optimization. Default
             is False.
-            
+
     Returns:
         result: Dict
             Dictionary with keys
                 state_amplitudes: describes the ground state wave function
                 hamiltonian_groundstate: minimum eigenvalue of qubit hamiltonian
                 qbm_params: parameters for recreating the resulting state_amplitudes
-                
+
     kwargs include: 
         eta_0, eta_f: default=1, for adaptive learning rates in qbm optimization
         max_iter: default=15, iterations for qbm optimization
@@ -39,7 +40,7 @@ def optimize_qbm_from_hamiltonian(hamiltonian,
     """
 
     pauli_string_len = set(len(key) for key in hamiltonian.keys())
-    assert(len(pauli_string_len) == 1), "No uniform length of resulting paul-strings"
+    assert (len(pauli_string_len) == 1), "No uniform length of resulting paul-strings"
     num_vis = next(iter(pauli_string_len))
     num_hid = num_hidden_qubits if num_hidden_qubits is not None else num_vis
 
@@ -61,19 +62,18 @@ def optimize_qbm_from_hamiltonian(hamiltonian,
     angles = 0.02*(2*np.random.rand(qbm_data.num_params) - 1)
 
     for i in range(max_iter + 1):
-        
+
         # generate probability distribution based on list of parameters
         state_amplitudes = qbm_builder.get_state_amplitudes(params_list=angles,
                                                             joined=True,
                                                             shots=shots)
         # initialize post-process with Hamiltonian of interest
         post_process = ExpValClass(state_amplitudes, qbm_data, hamiltonian)
-        
-        
+
         # evaluate expectation value of Hamiltonian
         hamilton_exp_val, cached_op_string_exp_vals = \
             post_process.get_hamilton_exp_value()
-            
+
         # save result if it better than before
         if hamilton_exp_val < optimal_cost:
             optimal_cost = hamilton_exp_val
@@ -83,9 +83,9 @@ def optimize_qbm_from_hamiltonian(hamiltonian,
         if i % print_iter == 0 and print_results:
             print(f'cost after {i} iters: {hamilton_exp_val}')
 
-        # gradien descent with decreating learning rate for every iteration if eta_f < eta_0 
+        # gradien descent with decreating learning rate for every iteration if eta_f < eta_0
         angles -= np.exp(decay_rate * i) * eta_0 * post_process.get_grad_h(angles).astype(float)
-        
+
     result = {}
     result['state_amplitudes'] = optimal_amplitudes
     result['hamiltonian_ground_state_energy'] = optimal_cost
@@ -112,5 +112,7 @@ if __name__ == '__main__':
     print_results = False
 
     result = optimize_qbm_from_hamiltonian(hamiltonian=hamilton,
-                                           num_hidden_qubits=num_hidden_qubits)
+                                           num_hidden_qubits=num_hidden_qubits,
+                                           backend=backend,
+                                           print_results=print_results)
     print(result)
